@@ -1,12 +1,11 @@
-<p align="center">
-  <img src="Picture/大狗.png" width="520" alt="大狗">
-</p>
-
-
 <h1 align="center">一些SLAM开源算法对比工作空间</h1>
 
 <p align="center">
   在统一数据集下运行 8 个开源 LiDAR-Inertial SLAM / LIO 方法，并输出统一格式的轨迹 CSV
+</p>
+
+<p align="center">
+  <img src="Picture/大狗.png" width="520" alt="大狗">
 </p>
 
 ---

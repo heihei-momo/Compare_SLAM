@@ -7,7 +7,6 @@ logs/
 .catkin_workspace
 **/Robotpose/*.csv
 
-# 上游仓库自带的文档动图(12 个约 105 MB)
 *.gif
 
 
