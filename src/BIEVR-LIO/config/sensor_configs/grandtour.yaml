@@ -1,0 +1,13 @@
+topics:
+  pointcloud: "/boxi/hesai/points"
+  imu: "/boxi/cpt7/imu"
+
+calibration: # T_IMU_LIDAR (LiDAR -> IMU)
+  translation: [0.30252, -0.04255, -0.01284]
+  rotation: [ 0.00634, -0.99998,  0.00067,
+             -0.99991, -0.00633,  0.01180,
+             -0.01179, -0.00074, -0.99993]
+
+lidar:
+  min_range_m: 0.5 # Exclude points closer than this range [m]
+  max_range_m: 100 # Exclude points farther than this range [m]

@@ -1,0 +1,29 @@
+# ============================================================================
+# BIEVR-LIO sensor config: BotanicGarden 数据集 (Velodyne VLP-16)
+#
+# 用法:
+#   roslaunch bievr_lio_ros process_bag.launch \
+#     sensor_config:=botanic_garden_velodyne params:=params \
+#     rosbag:=/home/yyh/study_files/bag_data/BotanicGarden/rosbag/1018_13_LIO.bag
+#   (sensor_config / params 也可以直接给绝对路径)
+#
+# 说明:
+#   - 其它数据集只需要把 topics / calibration / lidar 三段改掉;
+#   - 距离截断就在这里: lidar.min_range_m / max_range_m,
+#     在 Pipeline::processFrame 的第一步(输入点云进入处理时)按 |p| 过滤,
+#     与其它方法的 15 m 截断保持一致。
+# ============================================================================
+
+topics:
+  pointcloud: "/velodyne_points"
+  imu: "/imu/data"
+
+calibration: # T_IMU_LIDAR (LiDAR -> IMU)
+  translation: [-0.04165, -0.02326, 0.0284]
+  rotation: [1, 0, 0,
+             0, 1, 0,
+             0, 0, 1]
+
+lidar:
+  min_range_m: 0.5 # Exclude points closer than this range [m]
+  max_range_m: 15.0 # 距离截断: Exclude points farther than this range [m]

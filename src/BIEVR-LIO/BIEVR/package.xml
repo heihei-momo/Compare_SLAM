@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>bievr_lio</name>
+  <version>0.0.0</version>
+  <description>The bievr_lio package</description>
+
+  <maintainer email="paddy@todo.todo">paddy</maintainer>
+
+  <license>TODO</license>
+
+  <buildtool_depend>cmake</buildtool_depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>

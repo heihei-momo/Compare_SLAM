@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>bievr_ros_common</name>
+  <version>0.0.0</version>
+  <description>
+    Header-only, ROS-agnostic glue shared by the bievr_lio ROS1 and ROS2
+    wrappers: the YAML config loader and the templated message conversions.
+  </description>
+
+  <maintainer email="paddy@todo.todo">paddy</maintainer>
+
+  <license>TODO</license>
+
+  <buildtool_depend>cmake</buildtool_depend>
+
+  <depend>bievr_lio</depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>

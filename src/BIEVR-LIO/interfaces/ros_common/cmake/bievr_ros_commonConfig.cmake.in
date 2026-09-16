@@ -1,0 +1,13 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# The interface target links bievr_lio::bievr_lio (which transitively provides
+# Eigen/Ceres/TBB), so resolve the core package before importing our target.
+if(NOT TARGET bievr_lio::bievr_lio)
+  find_dependency(bievr_lio)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/bievr_ros_commonTargets.cmake")
+
+check_required_components(bievr_ros_common)

@@ -1,0 +1,77 @@
+# COIN-LIO 配置: Velodyne VLP-16
+# 点云字段: x,y,z,intensity,ring,time (标准 velodyne_pointcloud 输出)
+# 说明: COIN-LIO 原本只支持 Ouster, 这里用下面的 data_format/beam_altitude_angles
+#       等参数替代 Ouster 的 sensor metadata JSON, 光度前端(Projector)无需改动。
+common:
+    time_sync_en: false         # ONLY turn on when external time synchronization is really not possible
+
+preprocess:
+    lidar_type: 2                # 1 for Livox serials LiDAR, 2 for Velodyne LiDAR, 3 for ouster LiDAR,
+    scan_line: 16                # (仅记录用, 代码未读取)
+    blind: 2.0                   # 输入点云最小距离截断(米): 太近的点丢弃(盲区)
+    max_range: 15.0              # 输入点云最大距离截断(米): 超过该距离的点丢弃; 0 或负数表示不限制
+    lidar_sensor_z_offset: 0.0   # VLP-16 直接用雷达原点; Ouster 才需要 metadata 里的这个偏移
+    timestamp_unit: 2
+
+mapping:
+    point_filter_num: 4
+    filter_size_surf: 0.5
+    filter_size_map: 0.5
+    cube_side_length: 1000
+    acc_cov: 0.1
+    gyr_cov: 0.1
+    b_acc_cov: 0.0001
+    b_gyr_cov: 0.0001
+    fov_degree:    180
+    det_range:     150
+    extrinsic_est_en:  false      # true: enable the online estimation of IMU-LiDAR extrinsic
+    # 与 LIO-SAM / Fast-LIO2 / PV-LIO 表示同一个物理相对变换:
+    # LIO-SAM extrinsicTrans = IMU 在 LiDAR 系下的位置 (0.04165, 0.02326, -0.0284)
+    # COIN-LIO extrinsic_T   = LiDAR 在 IMU 系下的位置, 两者互为逆; 旋转为单位阵时即为取负
+    extrinsic_T: [-0.04165, -0.02326, 0.0284]
+    extrinsic_R: [1, 0, 0,
+                  0, 1, 0,
+                  0, 0, 1]
+
+publish:
+    path_en:  true               # true: 发布 /path (机器人轨迹), 才能在 rviz 里显示
+    scan_publish_en:  true
+    dense_publish_en: false
+    scan_bodyframe_pub_en: true
+    dashboard: true
+    debug: false
+
+robotpose:
+    csv_en:  true                # 退出时是否把机器人位姿(每帧)写成 csv
+    csv_file: "Robotpose/1005_01.csv"   # 位姿 csv 输出路径; 相对路径以本方法源码目录 src/COIN-LIO/ 为基准
+
+filter:
+    max_iteration: 5
+    photo_scale: 0.00095         # 光度残差权重(VLP-16 强度范围与 Ouster 不同, 可按需调)
+
+image:
+    patch_size: 5
+    max_range: 30
+    max_lifetime: 25
+    min_range: 0.7
+    suppression_radius: 10
+    num_features: 60
+    grad_min: 16.5               # 特征梯度阈值(VLP-16 强度是 0~255, Ouster 是更大的反射率量级, 可调)
+    ncc_threshold: 0.7075
+    margin: 4                    # 必须 < 行数/2: VLP-16 只有 16 行(Ouster 128 行才用 10), 否则 ROI 高度为负会崩
+    intensity_scale: 0.25
+    window: [41, 7]
+    # masks: VLP-16 没有 Ouster 那种固定盲区掩膜, 留空(不设置该参数即为空)
+    u_shift: 0.0                 # VLP-16 无列偏移
+    destagger: false             # VLP-16 无 destagger 概念
+    reflectivity: false          # 用 intensity 而不是 reflectivity
+
+# ---- 投影"内参": 替代 Ouster 的 sensor metadata (Projector 从这里读取) ----
+data_format:
+    pixels_per_column: 16.0          # = scan_line
+    columns_per_frame: 1800.0        # 10 Hz 时 VLP-16 方位分辨率 0.2° -> 1800 列
+    pixel_shift_by_row: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]   # 各 ring 无方位角偏移
+lidar_origin_to_beam_origin_mm: 0.0  # VLP-16 近似取 0 (Ouster 才有内部光束偏移)
+# VLP-16 的 16 条激光仰角(度), 顺序与驱动的 ring 0..15 对应, 必须递减
+beam_altitude_angles: [15.0, 13.0, 11.0, 9.0, 7.0, 5.0, 3.0, 1.0,
+                       -1.0, -3.0, -5.0, -7.0, -9.0, -11.0, -13.0, -15.0]

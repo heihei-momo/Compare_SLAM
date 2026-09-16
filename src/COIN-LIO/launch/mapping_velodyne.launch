@@ -1,0 +1,19 @@
+<launch>
+    <!-- COIN-LIO on Velodyne VLP-16 (/velodyne_points + /imu/data) -->
+    <arg name="rviz" default="true"/>
+    <arg name="point_topic" default="/velodyne_points"/>
+    <arg name="imu_topic" default="/imu/data"/>
+
+    <rosparam file="$(find coin_lio)/config/velodyne.yaml" command="load"/>
+    <rosparam file="$(find coin_lio)/config/line_removal.yaml" command="load"/>
+
+    <param name="common/lid_topic" type="string" value="$(arg point_topic)"/>
+    <param name="common/imu_topic" type="string" value="$(arg imu_topic)"/>
+
+    <node pkg="coin_lio" type="coin_lio_mapping" name="laserMapping" output="screen" launch-prefix=""/>
+
+    <group if="$(arg rviz)">
+        <node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz"
+              args="-d $(find coin_lio)/rviz_cfg/coinlio_viz.rviz"/>
+    </group>
+</launch>

@@ -1,0 +1,71 @@
+# ============================================================================
+# DA-LIO 配置: BotanicGarden 数据集 (Velodyne VLP-16)
+# 用法: roslaunch da_lio run_dalio_velodyne.launch
+#
+# 说明: 上游 config/velodyne.yaml 是按别的平台写的, 在 BotanicGarden 上必须改这几项
+#   scan_line: 16        VLP-16 是 16 线(上游文件写 32)
+#   timestamp_unit: 0    BotanicGarden 的 point.time 字段单位是"秒"
+#                        (上游文件按微秒=2 解释, 会让畸变校正的时间尺度差 1e6 倍)
+#   extrinsic_T          雷达在 IMU 系下的位置(上游文件是 0.28 m 的别的平台标定值)
+#   pcd_save_en: false   跑序列时不要往 Log/ 里堆一个巨大的 pcd
+#
+# 另外上游 launch 里用 <param> 写死的
+#   feature_extract_enable / point_filter_num / max_iteration /
+#   filter_size_surf / filter_size_map / cube_side_length / runtime_pos_log_enable
+# 也全部搬进本文件, 做到"只改 yaml 一处"。
+# ============================================================================
+
+# ---- 这些是上游 launch 里 <param> 的项, 现在只在这里改 ----
+feature_extract_enable: 0
+point_filter_num: 2
+max_iteration: 1
+filter_size_surf: 0.5
+filter_size_map: 0.5
+cube_side_length: 1000.0
+runtime_pos_log_enable: 0
+
+common:
+    lid_topic:  "/velodyne_points"
+    imu_topic:  "/imu/data"
+    time_sync_en: false            # 只有确实无法做外部时间同步时才打开
+    time_offset_lidar_to_imu: 0.0  # 雷达-IMU 时间偏移(用 LI-Init 等标出来的值)
+
+preprocess:
+    lidar_type: 2                  # 1 Livox, 2 Velodyne, 3 Ouster, 4 Hesai
+    scan_line: 16
+    scan_rate: 10                  # 单位 Hz, 只对 velodyne 有意义
+    timestamp_unit: 0              # point.time 的单位: 0 秒, 1 毫秒, 2 微秒, 3 纳秒
+    blind: 2.0                     # 最小距离(米), 近处噪点滤掉
+    max_range: 15.0                # 距离截断: 输入点云里 |p| 超过该值的点直接丢弃
+                                   # (与 FAST_LIO2/PV-LIO/COIN-LIO/VoxelMap/genz-icp 取一致); 0 或负数不截断
+
+# 机器人位姿 csv: 退出终端(Ctrl-C / roslaunch 结束)时一次性整文件写出, 不是追加
+robotpose:
+    save_en: true
+    csv_file: "Robotpose/1005_01.csv"   # 相对路径以本方法源码目录 src/DALI_SLAM/ 为基准(也可写绝对路径)
+
+mapping:
+    acc_cov: 0.1
+    gyr_cov: 0.1
+    b_acc_cov: 0.0001
+    b_gyr_cov: 0.0001
+    degeneracy: 4.48               # 退化检测阈值 sqrt(lambda_D), 见 Parameter_Descrip.md
+    fov_degree: 180
+    det_range: 100.0
+    extrinsic_est_en: false        # true 则在线估计外参
+    # LiDAR 在 IMU 系下的位置 = -[IMU 在 LiDAR 系下的位置]
+    # extrinsic_T: [ -0.04165, -0.02326, 0.0284 ]
+    extrinsic_T: [ 0, 0, 0 ]
+    extrinsic_R: [ 1, 0, 0,
+                   0, 1, 0,
+                   0, 0, 1 ]
+
+publish:
+    path_en: true                  # 在 rviz 里显示轨迹(/path)
+    scan_publish_en: true          # false 则关闭所有点云输出
+    dense_publish_en: true
+    scan_bodyframe_pub_en: false
+
+pcd_save:
+    pcd_save_en: false
+    interval: -1                   # -1: 所有帧存成一个 pcd(帧数多时会爆内存)

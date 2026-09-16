@@ -1,0 +1,16 @@
+topics:
+  pointcloud: "/livox/lidar"
+  imu: "/livox/imu"
+
+calibration: # T_IMU_LIDAR (LiDAR -> IMU)
+  translation: [0.04165, 0.02326, -0.0284]
+  rotation: [1, 0, 0,
+             0, 1, 0,
+             0, 0, 1]
+
+lidar:
+  min_range_m: 1.5 # Exclude points closer than this range [m]
+  max_range_m: 450 # Exclude points farther than this range [m]
+
+map:
+  max_size: 600000 # Maximum number of voxels to keep in the map

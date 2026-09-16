@@ -1,0 +1,23 @@
+# GenZ-ICP 参数集: BotanicGarden / Velodyne VLP-16
+# 说明:
+#   - max_range / min_range 就是"输入点云距离截断": 在 GenZICP::RegisterFrame 的最开始,
+#     核心 Preprocess() 会按点到雷达原点的距离裁剪掉 min_range > |p| 或 |p| > max_range 的点。
+#     只改这里即可, 不需要重新编译。
+#   - robotpose/csv_file: 退出时(Ctrl-C)把每帧位姿写成 csv 的路径(11 列, 全量覆盖)。
+#   - topic: 点云话题(yaml 里改这一处即可; 命令行 topic:=xxx 会覆盖它)。
+topic: "/velodyne_points"
+deskew: true                 # 用点云 time 字段做去畸变(会被归一化到 [0,1])
+max_range: 15.0              # 最大距离截断(米); 例如要压到 15 m 就改这里
+min_range: 2.0              # 最小距离截断(米, 盲区)
+voxel_size: 0.5              # 体素下采样(自适应, 由 desired_num_voxelized_points 微调)
+desired_num_voxelized_points: 3000
+planarity_threshold: 0.2
+max_points_per_voxel: 3
+initial_threshold: 2.0
+min_motion_th: 0.1
+max_num_iterations: 100
+convergence_criterion: 0.0001
+
+robotpose:
+    csv_en: true
+    csv_file: "Robotpose/1005_01.csv"   # 相对路径以本方法源码目录 src/genz-icp/ 为基准(也可写绝对路径)

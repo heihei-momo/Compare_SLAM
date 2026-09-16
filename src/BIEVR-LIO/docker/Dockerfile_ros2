@@ -1,0 +1,39 @@
+FROM osrf/ros:jazzy-desktop-full
+
+# Build-time user matching the host user so bind-mounted files stay user-owned.
+# Override with --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g).
+ARG USERNAME=bievr
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+# Create a host-matching user with passwordless sudo.
+# The jazzy base image already ships a uid 1000 "ubuntu" user, so remove it
+# first to free the uid/gid in case they collide with the requested ones.
+RUN apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/* \
+ && (userdel -r ubuntu 2>/dev/null || true) \
+ && groupadd -g ${GROUP_ID} ${USERNAME} \
+ && useradd -m -u ${USER_ID} -g ${GROUP_ID} -s /bin/bash ${USERNAME} \
+ && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME}
+
+# Copy scripts folder
+COPY scripts/ /home/${USERNAME}/scripts/
+WORKDIR /home/${USERNAME}/
+RUN chmod a+x -R /home/${USERNAME}/scripts \
+ && chown -R ${USER_ID}:${GROUP_ID} /home/${USERNAME}
+
+# Env variables
+ENV COLCON_WS=/home/${USERNAME}/colcon_ws
+ENV SCRIPTS_PATH=/home/${USERNAME}/scripts
+
+# Run the general and ROS dep installation (needs root for apt)
+RUN scripts/install_deps_ros2.sh
+
+# Install Ceres into /usr/local (needs root); it lands on cmake's default
+# search path, so no Ceres_DIR / CMAKE_PREFIX_PATH is required.
+RUN scripts/install_ceres.sh
+
+# Switch to the non-root user to build the workspace into their home.
+# uid=1000 lets the non-root user read the forwarded SSH agent socket for the
+# git clone; keep it in sync with USER_ID above (or switch the clones to HTTPS).
+USER ${USERNAME}
+RUN --mount=type=ssh,uid=1000 scripts/build_ros2.sh

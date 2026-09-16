@@ -1,0 +1,26 @@
+<launch>
+  <!-- 配置文件默认值直接写成完整路径(含文件名), 不再用 $(eval) 拼名字。
+       topic 也做成 launch 参数, 放在 params 上面:
+         - 默认值就是 BotanicGarden 用的话题(与 botanic_garden_velodyne.yaml 一致);
+         - 传了就以命令行参数为准(覆盖 sensor_config 里的同名项);
+         - 想完全以 sensor_config 为准, 就把对应 default 改成空字符串(default=""), 空=不覆盖。
+       换配置示例:
+         roslaunch bievr_lio_ros process_topics.launch \
+           sensor_config:=$(find bievr_lio_ros)/../../config/sensor_configs/mars.yaml \
+           pointcloud_topic:=/livox/lidar imu_topic:=/livox/imu
+       位姿 csv 的输出路径在 params.yaml 的 robotpose/csv_file 里(不在这里)。 -->
+
+  <arg name="sensor_config"    default="$(find bievr_lio_ros)/../../config/sensor_configs/botanic_garden_velodyne.yaml"/>
+  <arg name="pointcloud_topic" default="/velodyne_points"/>
+  <arg name="imu_topic"        default="/imu/data"/>
+  <arg name="params"           default="$(find bievr_lio_ros)/../../config/params.yaml"/>
+  <arg name="rviz"             default="true"/>
+
+  <!-- 节点从命令行参数读配置(不是 ROS 参数服务器), 所以用 args= 传完整路径/话题 -->
+  <node pkg="bievr_lio_ros" type="process_topics" name="bievr_lio_topics_node" output="screen"
+        args="--sensor_config_file $(arg sensor_config) --pointcloud_topic $(arg pointcloud_topic) --imu_topic $(arg imu_topic) --params_file $(arg params)"/>
+
+  <group if="$(arg rviz)">
+    <node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find bievr_lio_ros)/rviz/config.rviz" />
+  </group>
+</launch>

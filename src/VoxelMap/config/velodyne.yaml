@@ -1,0 +1,52 @@
+common:
+    lid_topic:  "/velodyne_points"
+    imu_topic:  "/imu/data"      # 注意: 原来是 "/imu_data"(带下划线), 你包里是 /imu/data
+                                 # 当前 imu.imu_en: false(纯激光模式)用不到, 启用 IMU 时才需要
+
+preprocess:
+    lidar_type: 2                #1 for Livox serials LiDAR, 2 for Velodyne LiDAR, 3 for L515 LiDAR
+    scan_line: 16                # 你的 VLP-16 是 16 线(原来是 64, 与传感器不符)
+    blind: 2                     # 输入点云最小距离截断(米, 盲区)
+    max_range: 15.0              # 输入点云最大距离截断(米): 超过该距离的点丢弃; 0 或负数表示不限制
+    point_filter_num: 1
+    calib_laser: false           # 必须 false: true 是 KITTI 专用 hack(对每个点做 0.15° 垂直角修正+重投影),
+                                 # 在 BotanicGarden 这种非 KITTI 数据上会让轨迹发散(实测 APE 6.95m -> 0.045m)
+
+mapping:
+    down_sample_size: 0.5
+    max_iteration: 3
+    voxel_size: 3.0
+    max_layer: 4                # 4 layer, 0, 1, 2, 3
+    layer_point_size: [5, 5, 5, 5, 5]
+    plannar_threshold: 0.01
+    max_points_size: 1000
+    max_cov_points_size: 1000
+
+noise_model:
+    ranging_cov: 0.04
+    angle_cov: 0.1
+    acc_cov_scale: 1.0
+    gyr_cov_scale: 0.5
+
+imu:
+    imu_en: false
+    extrinsic_T: [ 0, 0, 0]
+    extrinsic_R: [ 1, 0, 0, 
+                   0, 1, 0, 
+                   0, 0, 1]
+
+visualization:
+    pub_voxel_map: false
+    publish_max_voxel_layer: 1         # only publish 0,1,2 layer's plane
+    pub_point_cloud: false
+    dense_map_enable: false
+    pub_point_cloud_skip: 5             # publish one points per five points
+
+Result:
+    write_kitti_log: false
+    result_path: "/home/ycj/catkin_github/src/VoxelMap/Log/kitt_log.txt"
+
+# 退出时(Ctrl-C)把机器人位姿写成 csv: 11 列 timestamp_sec,x,y,z,qx,qy,qz,qw,roll_deg,pitch_deg,yaw_deg
+robotpose:
+    csv_en: true
+    csv_file: "Robotpose/1006_01.csv"   # 相对路径以本方法源码目录 src/VoxelMap/ 为基准(也可写绝对路径)

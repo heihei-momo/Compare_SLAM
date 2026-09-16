@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>bievr_lio_ros</name>
+  <version>0.0.0</version>
+  <description>The bievr_lio_ros package</description>
+
+  <maintainer email="paddy@todo.todo">paddy</maintainer>
+
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>bievr_lio</depend>
+  <depend>bievr_ros_common</depend>
+  <depend>yaml-cpp</depend>
+  <depend>nav_msgs</depend>
+  <depend>rosbag</depend>
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>tf</depend>
+  <depend>tf_conversions</depend>
+
+  <!-- Optional: Livox CustomMsg branches are only built if these drivers are
+       available. livox_ros_driver = gen1, livox_ros_driver2 = gen2. -->
+  <build_depend>livox_ros_driver</build_depend>
+  <exec_depend>livox_ros_driver</exec_depend>
+  <build_depend>livox_ros_driver2</build_depend>
+  <exec_depend>livox_ros_driver2</exec_depend>
+</package>

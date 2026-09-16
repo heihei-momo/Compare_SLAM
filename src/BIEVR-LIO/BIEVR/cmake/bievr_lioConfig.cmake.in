@@ -1,0 +1,24 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+if(NOT TARGET Eigen3::Eigen)
+  find_dependency(Eigen3)
+endif()
+if(NOT TARGET TBB::tbb)
+  find_dependency(TBB)
+endif()
+
+# Resolve Ceres only once, and let it be the sole provider of `glog::glog`.
+# The Ceres build in this workspace ships a FindGlog module that creates an
+# *unguarded* `glog::glog` imported target. Finding glog separately here (or
+# re-running CeresConfig after Ceres is already available, as catkin_simple
+# does) would attempt to create that target a second time and abort with
+# "target glog::glog already exists".
+if(NOT TARGET Ceres::ceres)
+  find_dependency(Ceres)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/bievr_lioTargets.cmake")
+
+check_required_components(bievr_lio)

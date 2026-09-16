@@ -1,0 +1,13 @@
+topics:
+  pointcloud: "/os_cloud_node/points"
+  imu: "/os_cloud_node/imu"
+
+calibration: # T_IMU_LIDAR (LiDAR -> IMU)
+  translation: [-0.00625, 0.011775, -0.007645]
+  rotation: [1, 0, 0,
+             0, 1, 0,
+             0, 0, 1]
+
+lidar:
+  min_range_m: 0.5 # Exclude points closer than this range [m]
+  max_range_m: 100 # Exclude points farther than this range [m]

@@ -1,0 +1,33 @@
+<launch>
+<!-- ==========================================================================
+     DA-LIO 在 BotanicGarden (Velodyne VLP-16) 上运行
+     参数全部在 config/botanic_garden_velodyne.yaml 里, 本文件不再写任何 <param>
+
+     运行步骤:
+       1) 终端1:  roscore
+       2) 终端2:  roslaunch da_lio run_dalio_velodyne.launch
+       3) 终端3:  rosbag play /home/yyh/study_files/bag_data/BotanicGarden/rosbag/1018_13_LIO.bag
+
+     输出:
+       - 位姿 csv: 由 yaml 的 robotpose/csv_file 指定(默认
+                   src/DALI_SLAM/Robotpose/1018_13.csv), Ctrl-C 退出终端时整文件写出,
+                   列为 timestamp_sec,x,y,z,qx,qy,qz,qw,roll_deg,pitch_deg,yaw_deg
+       - 轨迹: <DA_LIO 源码目录>/Log/traj<启动时刻>.txt
+               格式为 TUM(空格分隔): time x y z qx qy qz qw (MC-PGO 的输入)
+       - 退出终端时在终端打印: 平均单帧处理耗时 / 处理帧率 / 平均每次更新的有效观测点数
+       - rviz: /path 轨迹(10Hz), /cloud_registered 配准后点云, /Laser_map 地图,
+               /Odometry 里程计, /cloud_effected 有效观测点(固定坐标系 camera_init)
+     ========================================================================== -->
+
+	<arg name="rviz" default="true" />
+	<arg name="config" default="botanic_garden_velodyne.yaml" />
+
+	<rosparam command="load" file="$(find da_lio)/config/$(arg config)" />
+
+	<node pkg="da_lio" type="da_lio" name="da_lio" output="screen" />
+
+	<group if="$(arg rviz)">
+	<node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find da_lio)/rviz_cfg/loam_livox.rviz" />
+	</group>
+
+</launch>
